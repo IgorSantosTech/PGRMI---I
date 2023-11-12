@@ -16,17 +16,22 @@ public class TicTacToe {
     JLabel textLabel = new JLabel();
     JPanel textPanel = new JPanel();
     JPanel boardPanel = new JPanel();
-
-
+    
+    
     JButton[][] board = new JButton[3][3];
     String playerX = "X";
     String playerO = "O";
     String currentPlayer = playerX;
+    PlayerName playerName = new PlayerName();
+    
 
     boolean gameOver = false;
     int turnos = 0;
 
     TicTacToe() {
+        playerName.setPlayerXName(JOptionPane.showInputDialog("Nome do Jogador X:"));
+        playerName.setPlayerOName(JOptionPane.showInputDialog("Nome do Jogador O:"));
+        
         frame.setVisible(true);
         frame.setSize(boardWidth, boardHeight);
         frame.setLocationRelativeTo(null);
@@ -48,7 +53,7 @@ public class TicTacToe {
         boardPanel.setLayout(new GridLayout(3, 3));
         boardPanel.setBackground(Color.darkGray);
         frame.add(boardPanel);
-
+        
         for (int l = 0; l < 3; l++) {
             for (int c = 0; c < 3; c++) {
                 JButton telha = new JButton();
@@ -71,7 +76,7 @@ public class TicTacToe {
                             checkWinner();
                             if (!gameOver) {
                                 currentPlayer = currentPlayer.equals(playerX) ? playerO : playerX;
-                                textLabel.setText("Vez do jogador: " + currentPlayer);
+                                textLabel.setText("Vez do jogador: " + currentPlayer + " (" + (currentPlayer.equals(playerX) ? playerName.getPlayerXName() : playerName.getPlayerOName()) + ")");
                             }
                         }
                     }
@@ -144,7 +149,7 @@ public class TicTacToe {
     void setWinner(JButton telha) {
         telha.setForeground(Color.green);
         telha.setBackground(Color.gray);
-        textLabel.setText("O vencedor é: " + currentPlayer);
+        textLabel.setText("O vencedor é: " + (currentPlayer.equals(playerX) ? playerName.getPlayerXName() : playerName.getPlayerOName()));
         createRestartButton();
     }
     
