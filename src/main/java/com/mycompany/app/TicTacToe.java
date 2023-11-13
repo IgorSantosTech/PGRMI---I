@@ -28,10 +28,7 @@ public class TicTacToe {
     boolean gameOver = false;
     int turnos = 0;
 
-    TicTacToe() {
-        playerName.setPlayerXName(JOptionPane.showInputDialog("Nome do Jogador X:"));
-        playerName.setPlayerOName(JOptionPane.showInputDialog("Nome do Jogador O:"));
-        
+    TicTacToe() {       
         frame.setVisible(true);
         frame.setSize(boardWidth, boardHeight);
         frame.setLocationRelativeTo(null);
@@ -53,6 +50,25 @@ public class TicTacToe {
         boardPanel.setLayout(new GridLayout(3, 3));
         boardPanel.setBackground(Color.darkGray);
         frame.add(boardPanel);
+        
+        String playerXName = "";
+        String playerOName = "";
+
+        while (playerXName.isEmpty() || playerOName.isEmpty()) {
+            playerXName = showCustomInputDialog("Jogador 1");
+            if (playerXName.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Por favor, forneça um nome para o Jogador 1.");
+                continue;
+            }
+    
+        playerOName = showCustomInputDialog("Jogador 2");
+            if (playerOName.isEmpty()) {
+                JOptionPane.showMessageDialog(null, "Por favor, forneça um nome para o Jogador 2.");
+            }
+        }
+
+        playerName.setPlayerXName(playerXName);
+        playerName.setPlayerOName(playerOName);
         
         for (int l = 0; l < 3; l++) {
             for (int c = 0; c < 3; c++) {
@@ -193,4 +209,43 @@ public class TicTacToe {
         frame.revalidate();
         frame.repaint();
     }
+    
+    private String showCustomInputDialog(String playerName) {
+    JDialog dialog = new JDialog();
+    dialog.setTitle("Digite o nome do " + playerName);
+
+    JPanel panel = new JPanel();
+    
+    JLabel label = new JLabel("Nome do " + playerName + ":");
+    panel.add(label);
+    
+    JTextField textField = new JTextField(20);
+    panel.add(textField);
+    
+    JButton okButton = new JButton("OK");
+    okButton.addActionListener(e -> {
+        dialog.dispose();
+    });
+    panel.add(okButton);
+    
+    dialog.add(panel);
+    
+    dialog.setSize(300, 125);
+    dialog.setLocationRelativeTo(null);
+    dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
+    dialog.setModal(true);
+    
+    label.setForeground(Color.WHITE);
+    panel.setBackground(Color.DARK_GRAY);
+    textField.setBackground(Color.LIGHT_GRAY);
+    okButton.setBackground(Color.ORANGE);
+    okButton.setForeground(Color.WHITE);
+    
+    dialog.setVisible(true);
+    
+    return textField.getText();
+}
+
+
+    
 }
