@@ -7,6 +7,7 @@ package com.mycompany.app;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
+import java.io.*;
 
 public class TicTacToe {
     int boardWidth = 600;
@@ -19,6 +20,7 @@ public class TicTacToe {
     
     
     JButton[][] board = new JButton[3][3];
+    private JButton[][] winningButtons = new JButton[3][3];
     String playerX = "X";
     String playerO = "O";
     String currentPlayer = playerX;
@@ -26,7 +28,8 @@ public class TicTacToe {
     
 
     boolean gameOver = false;
-    int turnos = 0;
+    int turnos = 0; //Inicia os turnos em 0, quando chegar em 9 o jogo termina.
+    
 
     TicTacToe() {       
         frame.setVisible(true);
@@ -53,7 +56,7 @@ public class TicTacToe {
         
         String playerXName = "";
         String playerOName = "";
-
+        // Lógica para tornar a escolha de nomes obrigatória
         while (playerXName.isEmpty() || playerOName.isEmpty()) {
             playerXName = showCustomInputDialog("Jogador 1");
             if (playerXName.isEmpty()) {
@@ -70,6 +73,7 @@ public class TicTacToe {
         playerName.setPlayerXName(playerXName);
         playerName.setPlayerOName(playerOName);
         
+        //Adiciona os botões ao painel.
         for (int l = 0; l < 3; l++) {
             for (int c = 0; c < 3; c++) {
                 JButton telha = new JButton();
@@ -92,7 +96,7 @@ public class TicTacToe {
                             checkWinner();
                             if (!gameOver) {
                                 currentPlayer = currentPlayer.equals(playerX) ? playerO : playerX;
-                                textLabel.setText("Vez do jogador: " + currentPlayer + " (" + (currentPlayer.equals(playerX) ? playerName.getPlayerXName() : playerName.getPlayerOName()) + ")");
+                                textLabel.setText("Vez de " + (currentPlayer) + " (" + (currentPlayer.equals(playerX) ? playerName.getPlayerXName() : playerName.getPlayerOName()) + ")");
                             }
                         }
                     }
@@ -163,18 +167,81 @@ public class TicTacToe {
     }
 
     void setWinner(JButton telha) {
-        telha.setForeground(Color.green);
-        telha.setBackground(Color.gray);
+    if (!gameOver) {
         textLabel.setText("O vencedor é: " + (currentPlayer.equals(playerX) ? playerName.getPlayerXName() : playerName.getPlayerOName()));
+
+        if (currentPlayer.equals(playerX)) {
+            playerName.incrementPlayerXScore();
+        } else {
+            playerName.incrementPlayerOScore();
+        }
+
         createRestartButton();
+        createScoreButton();
+        // Marca o jogo como encerrado para evitar múltiplos incrementos de pontuação
+        gameOver = true;
+
+        // Armazena os botões vencedores
+        for (int l = 0; l < 3; l++) {
+            for (int c = 0; c < 3; c++) {
+                if (board[l][c].getText().equals(telha.getText())) {
+                    winningButtons[l][c] = board[l][c];
+                }
+            }
+        }
+
+        // Atualiza todos os botões vencedores
+        for (int l = 0; l < 3; l++) {
+            for (int c = 0; c < 3; c++) {
+                if (winningButtons[l][c] != null) {
+                    winningButtons[l][c].setForeground(Color.green);
+                    winningButtons[l][c].setBackground(Color.gray);
+                }
+            }
+        }
     }
+}
+
     
     void setVelha(JButton telha){
         telha.setForeground(Color.orange);
         telha.setBackground(Color.gray);
         textLabel.setText("O jogo deu Velha!");
         createRestartButton();
+        createScoreButton();
     }
+    
+    private void showScoreBoard() {
+        JFrame scoreFrame = new JFrame("Placar");
+        JTextArea scoreTextArea = new JTextArea(getScoreBoard());
+        scoreTextArea.setBackground(Color.DARK_GRAY);
+        scoreTextArea.setForeground(Color.WHITE);
+        Font monospacedFont = new Font("Monospaced", Font.PLAIN, 12); // Ajuste o tamanho da fonte conforme necessário
+        scoreTextArea.setFont(monospacedFont);
+        scoreFrame.add(new JScrollPane(scoreTextArea));
+        scoreFrame.setSize(300, 200);
+        scoreFrame.setLocationRelativeTo(null);
+        scoreFrame.setVisible(true);
+    }
+    
+     private String getScoreBoard() {
+    return "Placar:\n" +
+           playerName.getPlayerXName() + " (" + playerX + "): " + playerName.getPlayerXScore() + " vitórias\n" +
+           playerName.getPlayerOName() + " (" + playerO + "): " + playerName.getPlayerOScore() + " vitórias";
+}
+     
+     private void createScoreButton() {
+    JButton scoreButton = new JButton("Placar");
+    scoreButton.setBackground(Color.ORANGE);
+    scoreButton.setForeground(Color.white);
+    scoreButton.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            showScoreBoard();
+        }
+    });
+    textPanel.add(scoreButton, BorderLayout.WEST);
+}
     
     void createRestartButton() {
         JButton restartButton = new JButton("Restart");
@@ -191,8 +258,26 @@ public class TicTacToe {
         });
         textPanel.add(restartButton, BorderLayout.EAST);
     }
+    
+    void removeScoreButton() {
+        for (Component component : textPanel.getComponents()) {
+            if (component instanceof JButton && ((JButton) component).getText().equals("Placar")) {
+                textPanel.remove(component);
+                break;
+            }
+        }
+        frame.revalidate();
+        frame.repaint();
+    }
 
     void resetGame() {
+        // Remove a marcação dos botões vencedores
+        for (int l = 0; l < 3; l++) {
+            for (int c = 0; c < 3; c++) {
+                winningButtons[l][c] = null;
+            }
+        }
+
         for (int l = 0; l < 3; l++) {
             for (int c = 0; c < 3; c++) {
                 board[l][c].setText("");
@@ -208,6 +293,7 @@ public class TicTacToe {
         textPanel.remove(restartButton);
         frame.revalidate();
         frame.repaint();
+        removeScoreButton();
     }
     
     private String showCustomInputDialog(String playerName) {
